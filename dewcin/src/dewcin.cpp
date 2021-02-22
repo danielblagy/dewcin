@@ -14,8 +14,6 @@ INT WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, PSTR lpCmdLine,
 namespace dewcin
 {
 	HINSTANCE Window::hInstance;
-	std::thread Window::window_thread;
-	bool Window::running;
 	
 	Window::Window(const char* s_title)
 	{
@@ -30,6 +28,39 @@ namespace dewcin
 		window_thread.join();
 	}
 	
+	LRESULT CALLBACK Window::WindowCallback(
+		HWND window_handle,
+		UINT message,
+		WPARAM wParam,
+		LPARAM lParam
+	)
+	{
+		LRESULT result = 0;
+
+		Window* window = (Window*)GetWindowLongPtr(window_handle, GWLP_USERDATA);
+
+		switch (message)
+		{
+		case WM_CLOSE:
+		{
+			window->running = false;
+			OutputDebugStringA("Window close\n");
+		} break;
+
+		case WM_DESTROY:
+		{
+			window->running = false;
+			OutputDebugStringA("Window destroy\n");
+		} break;
+		default:
+		{
+			result = DefWindowProc(window_handle, message, wParam, lParam);
+		} break;
+		}
+
+		return result;
+	}
+	
 	void Window::start_window()
 	{
 		WNDCLASSA window_class = {};
@@ -39,7 +70,7 @@ namespace dewcin
 		//win32_resizeFrameBuffer(&backbuffer, screen_width, screen_height);
 
 		window_class.style = CS_HREDRAW | CS_VREDRAW;
-		window_class.lpfnWndProc = Window::WindowCallback;
+		window_class.lpfnWndProc = WindowCallback;
 		window_class.hInstance = Window::hInstance;
 		//window_class.hIcon;
 		window_class.lpszClassName = "dewcin_WindowClass";
@@ -67,6 +98,8 @@ namespace dewcin
 
 		if (window_handle)
 		{
+			SetWindowLongPtr(window_handle, GWLP_USERDATA, (LONG_PTR) this);
+			
 			while (running)
 			{
 				// process windows messages
@@ -102,36 +135,5 @@ namespace dewcin
 		{
 			OutputDebugStringA("Window handle is null\n");
 		}
-	}
-
-	LRESULT CALLBACK Window::WindowCallback(
-		HWND window_handle,
-		UINT message,
-		WPARAM wParam,
-		LPARAM lParam
-	)
-	{
-		LRESULT result = 0;
-
-		switch (message)
-		{
-		case WM_CLOSE:
-		{
-			running = false;
-			OutputDebugStringA("Window close\n");
-		} break;
-
-		case WM_DESTROY:
-		{
-			running = false;
-			OutputDebugStringA("Window destroy\n");
-		} break;
-		default:
-		{
-			result = DefWindowProc(window_handle, message, wParam, lParam);
-		} break;
-		}
-
-		return result;
 	}
 }

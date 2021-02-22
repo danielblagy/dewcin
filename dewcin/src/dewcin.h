@@ -12,8 +12,8 @@ namespace dewcin
 	private:
 		static HINSTANCE hInstance;
 		
-		static std::thread window_thread;
-		static bool running;
+		std::thread window_thread;
+		bool running;
 
 		const char* title;
 	
