@@ -12,15 +12,23 @@ namespace dewcin
 	private:
 		static HINSTANCE hInstance;
 		
-		//WNDCLASSA window_class;
-		std::thread window_thread;
-		bool running;
+		static std::thread window_thread;
+		static bool running;
+
+		const char* title;
 	
 	public:
-		Window();
+		Window(const char* title);
 		~Window();
 
 	private:
 		void start_window();
+
+		static LRESULT CALLBACK WindowCallback(
+			HWND window_handle,
+			UINT message,
+			WPARAM wParam,
+			LPARAM lParam
+		);
 	};
 }

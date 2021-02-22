@@ -1,42 +1,11 @@
 #include "dewcin.h"
 
 
-LRESULT CALLBACK WindowCallback(
-	HWND window_handle,
-	UINT message,
-	WPARAM wParam,
-	LPARAM lParam
-)
-{
-	LRESULT result = 0;
-
-	switch (message)
-	{
-		case WM_CLOSE:
-		{
-			running = false;
-			OutputDebugStringA("Window close\n");
-		} break;
-
-		case WM_DESTROY:
-		{
-			running = false;
-			OutputDebugStringA("Window destroy\n");
-		} break;
-		default:
-		{
-			result = DefWindowProc(window_handle, message, wParam, lParam);
-		} break;
-	}
-
-	return result;
-}
-
 INT WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, PSTR lpCmdLine, INT nCmdShow)
 {
 	// TODO : call the user-defined entry point here
 
-	dewcin::Window main_window;
+	dewcin::Window main_window("Test");
 
 	return 0;
 }
@@ -45,9 +14,13 @@ INT WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, PSTR lpCmdLine,
 namespace dewcin
 {
 	HINSTANCE Window::hInstance;
+	std::thread Window::window_thread;
+	bool Window::running;
 	
-	Window::Window()
+	Window::Window(const char* s_title)
 	{
+		title = s_title;
+		running = true;
 		window_thread = std::thread(&Window::start_window, this);
 	}
 
@@ -66,7 +39,7 @@ namespace dewcin
 		//win32_resizeFrameBuffer(&backbuffer, screen_width, screen_height);
 
 		window_class.style = CS_HREDRAW | CS_VREDRAW;
-		window_class.lpfnWndProc = WindowCallback;
+		window_class.lpfnWndProc = Window::WindowCallback;
 		window_class.hInstance = Window::hInstance;
 		//window_class.hIcon;
 		window_class.lpszClassName = "dewcin_WindowClass";
@@ -80,7 +53,7 @@ namespace dewcin
 		HWND window_handle = CreateWindowExA(
 			0,
 			window_class.lpszClassName,
-			"dewcin",
+			title,
 			WS_OVERLAPPEDWINDOW | WS_VISIBLE,
 			CW_USEDEFAULT,
 			CW_USEDEFAULT,
@@ -129,5 +102,36 @@ namespace dewcin
 		{
 			OutputDebugStringA("Window handle is null\n");
 		}
+	}
+
+	LRESULT CALLBACK Window::WindowCallback(
+		HWND window_handle,
+		UINT message,
+		WPARAM wParam,
+		LPARAM lParam
+	)
+	{
+		LRESULT result = 0;
+
+		switch (message)
+		{
+		case WM_CLOSE:
+		{
+			running = false;
+			OutputDebugStringA("Window close\n");
+		} break;
+
+		case WM_DESTROY:
+		{
+			running = false;
+			OutputDebugStringA("Window destroy\n");
+		} break;
+		default:
+		{
+			result = DefWindowProc(window_handle, message, wParam, lParam);
+		} break;
+		}
+
+		return result;
 	}
 }
