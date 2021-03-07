@@ -4,6 +4,8 @@
 
 #include <thread>
 
+#include <string>
+
 
 namespace dewcin
 {

@@ -6,6 +6,7 @@ INT WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, PSTR lpCmdLine,
 	// TODO : call the user-defined entry point here
 
 	dewcin::Window main_window("Test");
+	dewcin::Window secondary_window("Test2");
 
 	return 0;
 }
@@ -24,7 +25,6 @@ namespace dewcin
 
 	Window::~Window()
 	{
-		//running = false;
 		window_thread.join();
 	}
 	
@@ -73,7 +73,11 @@ namespace dewcin
 		window_class.lpfnWndProc = WindowCallback;
 		window_class.hInstance = Window::hInstance;
 		//window_class.hIcon;
-		window_class.lpszClassName = "dewcin_WindowClass";
+		//window_class.lpszClassName = "dewcin_WindowClass";
+
+		std::string window_class_name = "dewcin_" + std::string(title);
+
+		window_class.lpszClassName = window_class_name.c_str();
 
 		if (!RegisterClassA(&window_class))
 		{
