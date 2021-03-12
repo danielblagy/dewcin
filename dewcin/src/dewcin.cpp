@@ -5,9 +5,11 @@ namespace dewcin
 {
 	HINSTANCE Window::hInstance;
 	
-	Window::Window(const char* s_title)
+	Window::Window(const char* s_title, int s_width, int s_height)
 	{
 		title = s_title;
+		width = s_width;
+		height = s_height;
 		running = true;
 		window_thread = std::thread(&Window::start_window, this);
 	}
@@ -44,6 +46,19 @@ namespace dewcin
 			window->running = false;
 			OutputDebugStringA("Window destroy\n");
 		} break;
+
+		case WM_PAINT:
+		{
+			PAINTSTRUCT paint;
+			HDC device_context = BeginPaint(window_handle, &paint);
+
+			// update the window's dimensions
+			WindowDimensions window_dimensions = Renderer::getWindowDimensions(window_handle);
+			Renderer::win32_copyBufferToWindow(&window->backbuffer, device_context, window_dimensions.width, window_dimensions.height);
+
+			EndPaint(window_handle, &paint);
+		} break;
+
 		default:
 		{
 			result = DefWindowProc(window_handle, message, wParam, lParam);
@@ -59,13 +74,12 @@ namespace dewcin
 
 		OutputDebugStringA("Hey!\n");
 
-		//win32_resizeFrameBuffer(&backbuffer, screen_width, screen_height);
+		Renderer::win32_resizeFrameBuffer(&backbuffer, width, height);
 
 		window_class.style = CS_HREDRAW | CS_VREDRAW;
 		window_class.lpfnWndProc = WindowCallback;
 		window_class.hInstance = Window::hInstance;
 		//window_class.hIcon;
-		//window_class.lpszClassName = "dewcin_WindowClass";
 
 		std::string window_class_name = "dewcin_" + std::string(title);
 
@@ -84,8 +98,8 @@ namespace dewcin
 			WS_OVERLAPPEDWINDOW | WS_VISIBLE,
 			CW_USEDEFAULT,
 			CW_USEDEFAULT,
-			CW_USEDEFAULT,
-			CW_USEDEFAULT,
+			width,
+			height,
 			0,
 			0,
 			hInstance,
@@ -109,22 +123,18 @@ namespace dewcin
 					DispatchMessage(&message);		// Send message to the WindowProc
 				}
 
-				/*BitmapBuffer graphics_buffer = {};
-				graphics_buffer.memory = backbuffer.memory;
-				graphics_buffer.width = backbuffer.width;
-				graphics_buffer.height = backbuffer.height;
-				graphics_buffer.pitch = backbuffer.pitch;
+				Renderer::render_background(&backbuffer, { 1.f, 0.f, 0.f });
 
-
+				// Render the graphics_buffer
 				HDC device_context = GetDC(window_handle);
-				WindowDimensions dimensions = getWindowDimensions(window_handle);
-				win32_copyBufferToWindow(
+				WindowDimensions dimensions = Renderer::getWindowDimensions(window_handle);
+				Renderer::win32_copyBufferToWindow(
 					&backbuffer,
 					device_context,
 					dimensions.width,
 					dimensions.height
 				);
-				ReleaseDC(window_handle, device_context);*/
+				ReleaseDC(window_handle, device_context);
 			}
 		}
 		else
