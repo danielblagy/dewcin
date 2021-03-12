@@ -53,8 +53,8 @@ namespace dewcin
 			HDC device_context = BeginPaint(window_handle, &paint);
 
 			// update the window's dimensions
-			WindowDimensions window_dimensions = Renderer::getWindowDimensions(window_handle);
-			Renderer::win32_copyBufferToWindow(&window->backbuffer, device_context, window_dimensions.width, window_dimensions.height);
+			Dimensions window_dimensions = Renderer::getWindowDimensions(window_handle);
+			Renderer::win32_copyBufferToWindow(&window->graphics_buffer, device_context, window_dimensions.width, window_dimensions.height);
 
 			EndPaint(window_handle, &paint);
 		} break;
@@ -74,7 +74,7 @@ namespace dewcin
 
 		OutputDebugStringA("Hey!\n");
 
-		Renderer::win32_resizeFrameBuffer(&backbuffer, width, height);
+		Renderer::win32_resizeFrameBuffer(&graphics_buffer, width, height);
 
 		window_class.style = CS_HREDRAW | CS_VREDRAW;
 		window_class.lpfnWndProc = WindowCallback;
@@ -123,13 +123,13 @@ namespace dewcin
 					DispatchMessage(&message);		// Send message to the WindowProc
 				}
 
-				Renderer::render_background(&backbuffer, { 1.f, 0.f, 0.f });
+				Renderer::render_background(&graphics_buffer, { 1.f, 0.f, 0.f });
 
 				// Render the graphics_buffer
 				HDC device_context = GetDC(window_handle);
-				WindowDimensions dimensions = Renderer::getWindowDimensions(window_handle);
+				Dimensions dimensions = Renderer::getWindowDimensions(window_handle);
 				Renderer::win32_copyBufferToWindow(
-					&backbuffer,
+					&graphics_buffer,
 					device_context,
 					dimensions.width,
 					dimensions.height

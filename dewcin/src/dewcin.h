@@ -12,32 +12,44 @@
 
 namespace dewcin
 {
-	struct Win32_BitmapBuffer
+	union Dimensions
 	{
-		int width, height;
-		BITMAPINFO info;
-		void* memory;
-		int pitch;	// in bytes
+		struct { int width, height; };
+		struct { int x, y; };
 	};
-
-	struct WindowDimensions
+	
+	union RGBColor
 	{
-		int width, height;
+		struct { float red, green, blue; };
+		struct { float r, g, b; };
 	};
-
-	struct RGBColor
-	{
-		float red;
-		float green;
-		float blue;
-	};
-
-	#define BYTES_PER_PIXEL 4
 
 	class Renderer
 	{
+		friend LRESULT CALLBACK WindowCallback(
+			HWND window_handle,
+			UINT message,
+			WPARAM wParam,
+			LPARAM lParam
+		);
+
+		friend class Window;
+	
 	public:
-		static WindowDimensions getWindowDimensions(HWND window_handle)
+		struct BitmapBuffer
+		{
+			int width, height;
+			BITMAPINFO info;
+			void* memory;
+			int pitch;	// in bytes
+		};
+
+	private:
+		static const int bytes_per_pixel = 4;
+
+	// TODO : add public functions for drawing shapes and such
+	private:
+		static Dimensions getWindowDimensions(HWND window_handle)
 		{
 			RECT client_rect;
 			GetClientRect(window_handle, &client_rect);
@@ -47,7 +59,7 @@ namespace dewcin
 
 
 		// resizes the Device Independent Buffer (DIB) section
-		static void win32_resizeFrameBuffer(Win32_BitmapBuffer* buffer, int width, int height)
+		static void win32_resizeFrameBuffer(BitmapBuffer* buffer, int width, int height)
 		{
 			if (buffer->memory)
 			{
@@ -64,13 +76,13 @@ namespace dewcin
 			buffer->info.bmiHeader.biBitCount = 32;
 			buffer->info.bmiHeader.biCompression = BI_RGB;
 
-			int bitmap_memory_size = buffer->width * buffer->height * BYTES_PER_PIXEL;
+			int bitmap_memory_size = buffer->width * buffer->height * bytes_per_pixel;
 			buffer->memory = VirtualAlloc(0, bitmap_memory_size, MEM_RESERVE | MEM_COMMIT, PAGE_READWRITE);
 
-			buffer->pitch = buffer->width * BYTES_PER_PIXEL;
+			buffer->pitch = buffer->width * bytes_per_pixel;
 		}
 
-		static void win32_copyBufferToWindow(Win32_BitmapBuffer* buffer, HDC device_context, int window_width, int window_height)
+		static void win32_copyBufferToWindow(BitmapBuffer* buffer, HDC device_context, int window_width, int window_height)
 		{
 			StretchDIBits(
 				device_context,
@@ -83,7 +95,7 @@ namespace dewcin
 			);
 		}
 
-		static void render_background(Win32_BitmapBuffer* buffer, RGBColor color)
+		static void render_background(BitmapBuffer* buffer, RGBColor color)
 		{
 			uint32_t raw_color = (round_float_to_uint32(color.red * 255.0f) << 16) |
 				(round_float_to_uint32(color.green * 255.0f) << 8) |
@@ -115,6 +127,15 @@ namespace dewcin
 	
 	class Window
 	{
+		friend LRESULT CALLBACK WindowCallback(
+			HWND window_handle,
+			UINT message,
+			WPARAM wParam,
+			LPARAM lParam
+		);
+		
+		friend class Renderer;
+
 	private:
 		// TODO : move to Gui
 		static HINSTANCE hInstance;
@@ -125,7 +146,7 @@ namespace dewcin
 		const char* title;
 		int width, height;
 
-		Win32_BitmapBuffer backbuffer;
+		Renderer::BitmapBuffer graphics_buffer;
 	
 	public:
 		Window(const char* title, int width, int height);
@@ -135,12 +156,5 @@ namespace dewcin
 
 	private:
 		void start_window();
-
-		friend LRESULT CALLBACK WindowCallback(
-			HWND window_handle,
-			UINT message,
-			WPARAM wParam,
-			LPARAM lParam
-		);
 	};
 }
