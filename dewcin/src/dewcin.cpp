@@ -1,19 +1,26 @@
 #include "dewcin.h"
 
 
-INT WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, PSTR lpCmdLine, INT nCmdShow)
+/*INT WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, PSTR lpCmdLine, INT nCmdShow)
 {
 	// TODO : call the user-defined entry point here
 
-	dewcin::Window main_window("Test");
-	dewcin::Window secondary_window("Test2");
+	if (dewcin::entry_point)
+	{
+		return dewcin::entry_point();
+	}
+	else
+	{
+		OutputDebugStringA("Set an entry point function by calling dewcin::Gui::SetEntryPoint()\n");
+	}
 
 	return 0;
-}
-
+}*/
 
 namespace dewcin
 {
+	//int (*entry_point)(void) = 0;
+	
 	HINSTANCE Window::hInstance;
 	
 	Window::Window(const char* s_title)
@@ -28,7 +35,8 @@ namespace dewcin
 		window_thread.join();
 	}
 	
-	LRESULT CALLBACK Window::WindowCallback(
+	// TODO : resolve the separate thread issue
+	LRESULT CALLBACK WindowCallback(
 		HWND window_handle,
 		UINT message,
 		WPARAM wParam,
@@ -38,6 +46,8 @@ namespace dewcin
 		LRESULT result = 0;
 
 		Window* window = (Window*)GetWindowLongPtr(window_handle, GWLP_USERDATA);
+		if (window)
+			OutputDebugStringA(window->get_title());
 
 		switch (message)
 		{
@@ -103,7 +113,7 @@ namespace dewcin
 		if (window_handle)
 		{
 			SetWindowLongPtr(window_handle, GWLP_USERDATA, (LONG_PTR) this);
-			
+			OutputDebugStringA("INIT\n");
 			while (running)
 			{
 				// process windows messages
