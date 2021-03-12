@@ -1,26 +1,8 @@
 #include "dewcin.h"
 
 
-/*INT WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, PSTR lpCmdLine, INT nCmdShow)
-{
-	// TODO : call the user-defined entry point here
-
-	if (dewcin::entry_point)
-	{
-		return dewcin::entry_point();
-	}
-	else
-	{
-		OutputDebugStringA("Set an entry point function by calling dewcin::Gui::SetEntryPoint()\n");
-	}
-
-	return 0;
-}*/
-
 namespace dewcin
 {
-	//int (*entry_point)(void) = 0;
-	
 	HINSTANCE Window::hInstance;
 	
 	Window::Window(const char* s_title)

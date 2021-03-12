@@ -34,13 +34,6 @@ namespace dewcin
 	private:
 		void start_window();
 
-		/*static LRESULT CALLBACK WindowCallback(
-			HWND window_handle,
-			UINT message,
-			WPARAM wParam,
-			LPARAM lParam
-		);*/
-
 		friend LRESULT CALLBACK WindowCallback(
 			HWND window_handle,
 			UINT message,
