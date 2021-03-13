@@ -24,6 +24,14 @@ namespace dewcin
 		struct { float r, g, b; };
 	};
 
+	union Rect
+	{
+		struct { int x, y, z, w; };
+		struct { int x, y, width, height; };
+		struct { int left, top, right, bottom; };
+		struct { int min_x, min_y, max_x, max_y; };
+	};
+
 	class Renderer
 	{
 		friend LRESULT CALLBACK WindowCallback(
@@ -49,8 +57,7 @@ namespace dewcin
 
 	// TODO : add public functions for drawing other shapes
 	public:
-		// TODO : make BitmapBuffer private and require dewcin::Window* here instead
-		static void FillRectangle(BitmapBuffer* buffer, int32_t min_x, int32_t min_y, int32_t max_x, int32_t max_y, RGBColor color);
+		static void FillRectangle(Window* window, const Rect& rect, RGBColor color);
 
 	private:
 		static Dimensions getWindowDimensions(HWND window_handle);

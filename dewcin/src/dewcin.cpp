@@ -3,25 +3,27 @@
 
 namespace dewcin
 {
-	// TODO : make BitmapBuffer private and require dewcin::Window* here instead
-	void Renderer::FillRectangle(BitmapBuffer* buffer, int32_t min_x, int32_t min_y, int32_t max_x, int32_t max_y, RGBColor color)
+	void Renderer::FillRectangle(Window* window, const Rect& rect, RGBColor color)
 	{
+		BitmapBuffer* buffer = &window->graphics_buffer;
+		Rect draw_rect = { rect.x, rect.y, rect.x + rect.width, rect.y + rect.height };
+		
 		// clipping
-		if (min_x < 0)				min_x = 0;
-		if (min_y < 0)				min_y = 0;
-		if (max_x > buffer->width)	max_x = buffer->width;
-		if (max_y > buffer->height)	max_y = buffer->height;
+		if (draw_rect.min_x < 0)				draw_rect.min_x = 0;
+		if (draw_rect.min_y < 0)				draw_rect.min_y = 0;
+		if (draw_rect.max_x > buffer->width)	draw_rect.max_x = buffer->width;
+		if (draw_rect.max_y > buffer->height)	draw_rect.max_y = buffer->height;
 
 		// convert float rgb color to uint representation
 		uint32_t raw_color = (round_float_to_uint32(color.red * 255.0f) << 16) |
 			(round_float_to_uint32(color.green * 255.0f) << 8) |
 			(round_float_to_uint32(color.blue * 255.0f) << 0);
 
-		uint8_t* row = (uint8_t*)buffer->memory + min_x * bytes_per_pixel + min_y * buffer->pitch;
-		for (int y = min_y; y < max_y; y++)
+		uint8_t* row = (uint8_t*)buffer->memory + draw_rect.min_x * bytes_per_pixel + draw_rect.min_y * buffer->pitch;
+		for (int y = draw_rect.min_y; y < draw_rect.max_y; y++)
 		{
 			uint32_t* pixel = (uint32_t*)row;
-			for (int x = min_x; x < max_x; x++)
+			for (int x = draw_rect.min_x; x < draw_rect.max_x; x++)
 			{
 				*pixel++ = raw_color;
 			}
@@ -218,7 +220,7 @@ namespace dewcin
 				Renderer::render_background(&graphics_buffer, { 1.f, 0.f, 0.f });
 				//Renderer::render_background(&graphics_buffer, { 0.f, 0.f, 1.f });
 
-				Renderer::FillRectangle(&graphics_buffer, 200, 200, 350, 280, { 0.f, 1.f, 0.f });
+				Renderer::FillRectangle(this, { 200, 200, 150, 80 }, { 0.f, 1.f, 0.f });
 
 				// Render the graphics_buffer
 				HDC device_context = GetDC(window_handle);
