@@ -47,7 +47,34 @@ namespace dewcin
 	private:
 		static const int bytes_per_pixel = 4;
 
-	// TODO : add public functions for drawing shapes and such
+	// TODO : add public functions for drawing other shapes
+	public:
+		// TODO : make BitmapBuffer private and require dewcin::Window* here instead
+		static void FillRectangle(BitmapBuffer* buffer, int32_t min_x, int32_t min_y, int32_t max_x, int32_t max_y, RGBColor color)
+		{
+			// clipping
+			if (min_x < 0)				min_x = 0;
+			if (min_y < 0)				min_y = 0;
+			if (max_x > buffer->width)	max_x = buffer->width;
+			if (max_y > buffer->height)	max_y = buffer->height;
+
+			// convert float rgb color to uint representation
+			uint32_t raw_color = (round_float_to_uint32(color.red * 255.0f) << 16) |
+				(round_float_to_uint32(color.green * 255.0f) << 8) |
+				(round_float_to_uint32(color.blue * 255.0f) << 0);
+
+			uint8_t* row = (uint8_t*)buffer->memory + min_x * bytes_per_pixel + min_y * buffer->pitch;
+			for (int y = min_y; y < max_y; y++)
+			{
+				uint32_t* pixel = (uint32_t*)row;
+				for (int x = min_x; x < max_x; x++)
+				{
+					*pixel++ = raw_color;
+				}
+				row += buffer->pitch;
+			}
+		}
+
 	private:
 		static Dimensions getWindowDimensions(HWND window_handle)
 		{
@@ -95,6 +122,7 @@ namespace dewcin
 			);
 		}
 
+		// TODO : should this be a public api function ??
 		static void render_background(BitmapBuffer* buffer, RGBColor color)
 		{
 			uint32_t raw_color = (round_float_to_uint32(color.red * 255.0f) << 16) |

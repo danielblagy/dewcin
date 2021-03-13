@@ -52,7 +52,8 @@ namespace dewcin
 			PAINTSTRUCT paint;
 			HDC device_context = BeginPaint(window_handle, &paint);
 
-			// update the window's dimensions
+			// update when resized (stretches the image)
+			// TODO : maybe do a resize_frame_buffer ??
 			Dimensions window_dimensions = Renderer::getWindowDimensions(window_handle);
 			Renderer::win32_copyBufferToWindow(&window->graphics_buffer, device_context, window_dimensions.width, window_dimensions.height);
 
@@ -124,6 +125,9 @@ namespace dewcin
 				}
 
 				Renderer::render_background(&graphics_buffer, { 1.f, 0.f, 0.f });
+				//Renderer::render_background(&graphics_buffer, { 0.f, 0.f, 1.f });
+
+				Renderer::FillRectangle(&graphics_buffer, 200, 200, 350, 280, { 0.f, 1.f, 0.f });
 
 				// Render the graphics_buffer
 				HDC device_context = GetDC(window_handle);
