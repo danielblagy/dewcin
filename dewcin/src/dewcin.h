@@ -57,6 +57,10 @@ namespace dewcin
 
 	// TODO : add public functions for drawing other shapes
 	public:
+		// Render a rectangle
+		// window - the window on which to render
+		// rect - x, y, width, height, where x,y - a point for the left-top corner and width,height - the size of the rectangle
+		// color - color in float RGB
 		static void FillRectangle(Window* window, const Rect& rect, RGBColor color);
 
 	private:
@@ -101,15 +105,16 @@ namespace dewcin
 		bool running;
 
 		const char* title;
-		int width, height;
+		Dimensions size;
 
 		Renderer::BitmapBuffer graphics_buffer;
 	
 	public:
-		Window(const char* title, int width, int height);
+		Window(const char* title, const Dimensions& size);
 		~Window();
 
-		inline const char* get_title() { return title; }
+		inline const char* getTitle() { return title; }
+		inline Dimensions getSize() { return size; }
 
 	private:
 		void start_window();

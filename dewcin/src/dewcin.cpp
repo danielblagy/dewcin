@@ -98,11 +98,10 @@ namespace dewcin
 	
 	HINSTANCE Window::hInstance;
 	
-	Window::Window(const char* s_title, int s_width, int s_height)
+	Window::Window(const char* s_title, const Dimensions& s_size)
 	{
 		title = s_title;
-		width = s_width;
-		height = s_height;
+		size = s_size;
 		running = true;
 		window_thread = std::thread(&Window::start_window, this);
 	}
@@ -124,7 +123,7 @@ namespace dewcin
 
 		Window* window = (Window*)GetWindowLongPtr(window_handle, GWLP_USERDATA);
 		if (window)
-			OutputDebugStringA(window->get_title());
+			OutputDebugStringA(window->title);
 
 		switch (message)
 		{
@@ -168,7 +167,7 @@ namespace dewcin
 
 		OutputDebugStringA("Hey!\n");
 
-		Renderer::resize_frame_buffer(&graphics_buffer, width, height);
+		Renderer::resize_frame_buffer(&graphics_buffer, size.width, size.height);
 
 		window_class.style = CS_HREDRAW | CS_VREDRAW;
 		window_class.lpfnWndProc = WindowCallback;
@@ -192,8 +191,8 @@ namespace dewcin
 			WS_OVERLAPPEDWINDOW | WS_VISIBLE,
 			CW_USEDEFAULT,
 			CW_USEDEFAULT,
-			width,
-			height,
+			size.width,
+			size.height,
 			0,
 			0,
 			hInstance,
