@@ -104,6 +104,9 @@ namespace dewcin
 		size = s_size;
 		running = true;
 		window_thread = std::thread(&Window::start_window, this);
+
+		// gray color by default if unspecified
+		background_color = { 0.5f, 0.5f, 0.5f };
 	}
 
 	Window::~Window()
@@ -216,8 +219,7 @@ namespace dewcin
 					DispatchMessage(&message);		// Send message to the WindowProc
 				}
 
-				Renderer::render_background(&graphics_buffer, { 1.f, 0.f, 0.f });
-				//Renderer::render_background(&graphics_buffer, { 0.f, 0.f, 1.f });
+				Renderer::render_background(&graphics_buffer, background_color);
 
 				Renderer::FillRectangle(this, { 200, 200, 150, 80 }, { 0.f, 1.f, 0.f });
 

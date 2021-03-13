@@ -3,8 +3,8 @@
 #include <windows.h>
 
 #include <thread>
-
 #include <string>
+#include <functional>
 
 
 #define DEWCIN_APP_ENTRY_POINT INT WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, PSTR lpCmdLine, INT nCmdShow)
@@ -104,12 +104,26 @@ namespace dewcin
 		std::thread window_thread;
 		bool running;
 
+		Renderer::BitmapBuffer graphics_buffer;
+
+	public:
+		// The background color of the window in float RGB
+		// Gray color (0.5f, 0.5f, 0.5f) by default if unspecified
+		RGBColor background_color;
+		
+		// if a function is provided, it will be called each time the window updates, before clearing the screen
+		// (intended to be used as an update function before the rendering)
+		std::function<void(Window*)> before_clear;
+		// if a function is provided, it will be called each time after the window is cleared with the background color
+		// (intended to be used as a main render function)
+		std::function<void(Window*)> after_clear;
+
+	private:
 		const char* title;
 		Dimensions size;
-
-		Renderer::BitmapBuffer graphics_buffer;
 	
 	public:
+		// TODO : window background color, positioning, resize, fullscreen
 		Window(const char* title, const Dimensions& size);
 		~Window();
 
