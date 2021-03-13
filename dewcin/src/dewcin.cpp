@@ -204,10 +204,37 @@ namespace dewcin
 
 		if (window_handle)
 		{
-			SetWindowLongPtr(window_handle, GWLP_USERDATA, (LONG_PTR) this);
 			OutputDebugStringA("INIT\n");
+			
+			// Set user data for the win32 window callback function
+			SetWindowLongPtr(window_handle, GWLP_USERDATA, (LONG_PTR) this);
+
+			// init the clock
+			LARGE_INTEGER cpu_frequency;
+			QueryPerformanceFrequency(&cpu_frequency);
+
+			LARGE_INTEGER last_counter;
+			QueryPerformanceCounter(&last_counter);
+
+			uint64_t last_cycle_count = __rdtsc();
+
 			while (running)
 			{
+				// handle time delta
+				uint64_t current_cycle_count = __rdtsc();
+
+				LARGE_INTEGER current_counter;
+				QueryPerformanceCounter(&current_counter);
+
+				uint64_t cycles_elapsed = current_cycle_count - last_cycle_count;
+				int64_t counter_elapsed = current_counter.QuadPart - last_counter.QuadPart;
+
+				float delta = 1000.0f * (float)counter_elapsed / (float)cpu_frequency.QuadPart;	// in milliseconds
+				//int32_t fps = (int32_t)(cpu_frequency.QuadPart / counter_elapsed);
+
+				last_cycle_count = current_cycle_count;
+				last_counter = current_counter;
+				
 				// process windows messages
 				MSG message;
 				while (PeekMessage(&message, 0, 0, 0, PM_REMOVE))
@@ -219,13 +246,14 @@ namespace dewcin
 					DispatchMessage(&message);		// Send message to the WindowProc
 				}
 
+				// update & render
 				if (before_clear)
-					before_clear(this);
+					before_clear(this, delta);
 				
 				Renderer::render_background(&graphics_buffer, background_color);
 
 				if (after_clear)
-					after_clear(this);
+					after_clear(this, delta);
 
 				// Render the graphics_buffer
 				HDC device_context = GetDC(window_handle);

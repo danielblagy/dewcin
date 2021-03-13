@@ -113,10 +113,10 @@ namespace dewcin
 		
 		// if a function is provided, it will be called each time the window updates, before clearing the screen
 		// (intended to be used as an update function before the rendering)
-		std::function<void(Window*)> before_clear;
+		std::function<void(Window*, float delta)> before_clear;
 		// if a function is provided, it will be called each time after the window is cleared with the background color
 		// (intended to be used as a main render function)
-		std::function<void(Window*)> after_clear;
+		std::function<void(Window*, float delta)> after_clear;
 
 	private:
 		const char* title;
