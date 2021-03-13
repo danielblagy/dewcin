@@ -35,7 +35,7 @@ namespace dewcin
 
 		friend class Window;
 	
-	public:
+	private:
 		struct BitmapBuffer
 		{
 			int width, height;
@@ -50,104 +50,26 @@ namespace dewcin
 	// TODO : add public functions for drawing other shapes
 	public:
 		// TODO : make BitmapBuffer private and require dewcin::Window* here instead
-		static void FillRectangle(BitmapBuffer* buffer, int32_t min_x, int32_t min_y, int32_t max_x, int32_t max_y, RGBColor color)
-		{
-			// clipping
-			if (min_x < 0)				min_x = 0;
-			if (min_y < 0)				min_y = 0;
-			if (max_x > buffer->width)	max_x = buffer->width;
-			if (max_y > buffer->height)	max_y = buffer->height;
-
-			// convert float rgb color to uint representation
-			uint32_t raw_color = (round_float_to_uint32(color.red * 255.0f) << 16) |
-				(round_float_to_uint32(color.green * 255.0f) << 8) |
-				(round_float_to_uint32(color.blue * 255.0f) << 0);
-
-			uint8_t* row = (uint8_t*)buffer->memory + min_x * bytes_per_pixel + min_y * buffer->pitch;
-			for (int y = min_y; y < max_y; y++)
-			{
-				uint32_t* pixel = (uint32_t*)row;
-				for (int x = min_x; x < max_x; x++)
-				{
-					*pixel++ = raw_color;
-				}
-				row += buffer->pitch;
-			}
-		}
+		static void FillRectangle(BitmapBuffer* buffer, int32_t min_x, int32_t min_y, int32_t max_x, int32_t max_y, RGBColor color);
 
 	private:
-		static Dimensions getWindowDimensions(HWND window_handle)
-		{
-			RECT client_rect;
-			GetClientRect(window_handle, &client_rect);
-
-			return { client_rect.right - client_rect.left, client_rect.bottom - client_rect.top };
-		}
-
+		static Dimensions getWindowDimensions(HWND window_handle);
 
 		// resizes the Device Independent Buffer (DIB) section
-		static void win32_resizeFrameBuffer(BitmapBuffer* buffer, int width, int height)
-		{
-			if (buffer->memory)
-			{
-				VirtualFree(buffer->memory, 0, MEM_RELEASE);
-			}
+		static void resize_frame_buffer(BitmapBuffer* buffer, int width, int height);
 
-			buffer->width = width;
-			buffer->height = height;
-
-			buffer->info.bmiHeader.biSize = sizeof(buffer->info.bmiHeader);
-			buffer->info.bmiHeader.biWidth = buffer->width;
-			buffer->info.bmiHeader.biHeight = -(buffer->height);
-			buffer->info.bmiHeader.biPlanes = 1;
-			buffer->info.bmiHeader.biBitCount = 32;
-			buffer->info.bmiHeader.biCompression = BI_RGB;
-
-			int bitmap_memory_size = buffer->width * buffer->height * bytes_per_pixel;
-			buffer->memory = VirtualAlloc(0, bitmap_memory_size, MEM_RESERVE | MEM_COMMIT, PAGE_READWRITE);
-
-			buffer->pitch = buffer->width * bytes_per_pixel;
-		}
-
-		static void win32_copyBufferToWindow(BitmapBuffer* buffer, HDC device_context, int window_width, int window_height)
-		{
-			StretchDIBits(
-				device_context,
-				0, 0, window_width, window_height,
-				0, 0, buffer->width, buffer->height,
-				buffer->memory,
-				&(buffer->info),
-				DIB_RGB_COLORS,
-				SRCCOPY
-			);
-		}
+		static void copy_buffer_to_window(BitmapBuffer* buffer, HDC device_context, int window_width, int window_height);
 
 		// TODO : should this be a public api function ??
-		static void render_background(BitmapBuffer* buffer, RGBColor color)
-		{
-			uint32_t raw_color = (round_float_to_uint32(color.red * 255.0f) << 16) |
-				(round_float_to_uint32(color.green * 255.0f) << 8) |
-				(round_float_to_uint32(color.blue * 255.0f) << 0);
-
-			uint8_t* row = (uint8_t*)buffer->memory;
-			for (int y = 0; y < buffer->height; y++)
-			{
-				uint32_t* pixel = (uint32_t*)row;
-				for (int x = 0; x < buffer->width; x++)
-				{
-					*pixel++ = raw_color;
-				}
-				row += buffer->pitch;
-			}
-		}
+		static void render_background(BitmapBuffer* buffer, RGBColor color);
 
 	private:
-		static uint32_t round_float_to_uint32(float value)
+		static inline uint32_t round_float_to_uint32(float value)
 		{
 			return (uint32_t)(value + 0.5f);
 		}
 
-		static int32_t round_float_to_int32(float value)
+		static inline int32_t round_float_to_int32(float value)
 		{
 			return (int32_t)(value + 0.5f);
 		}
