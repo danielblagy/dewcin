@@ -219,9 +219,13 @@ namespace dewcin
 					DispatchMessage(&message);		// Send message to the WindowProc
 				}
 
+				if (before_clear)
+					before_clear(this);
+				
 				Renderer::render_background(&graphics_buffer, background_color);
 
-				Renderer::FillRectangle(this, { 200, 200, 150, 80 }, { 0.f, 1.f, 0.f });
+				if (after_clear)
+					after_clear(this);
 
 				// Render the graphics_buffer
 				HDC device_context = GetDC(window_handle);
