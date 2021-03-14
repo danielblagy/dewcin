@@ -3,6 +3,8 @@
 
 namespace dewcin
 {
+	// Renderer
+	
 	void Renderer::FillRectangle(Window* window, const Rect& rect, RGBColor color)
 	{
 		BitmapBuffer* buffer = &window->graphics_buffer;
@@ -96,6 +98,8 @@ namespace dewcin
 		}
 	}
 	
+	// Window
+	
 	HINSTANCE Window::hInstance;
 	
 	Window::Window(const char* s_title, const Dimensions& s_size)
@@ -142,6 +146,29 @@ namespace dewcin
 			OutputDebugStringA("Window destroy\n");
 		} break;
 
+		// keyboard input handling
+		case WM_SYSKEYDOWN:
+		case WM_SYSKEYUP:
+		case WM_KEYDOWN:
+		case WM_KEYUP:
+		{
+			uint32_t VKCode = wParam;
+
+			bool was_down = (lParam & (1 << 30)) != 0;
+			bool is_down = (lParam & (1 << 31)) == 0;
+			if (was_down != is_down)
+			{
+				// handle the close operation with alt+F4
+				bool alt_key_was_down = (lParam & (1 << 29)) != 0;
+				if ((VKCode == VK_F4) && alt_key_was_down)
+				{
+					window->running = false;
+				}
+			}
+
+			Input::process_keyboard_input(VKCode, was_down, is_down);
+		} break;
+		
 		case WM_PAINT:
 		{
 			PAINTSTRUCT paint;
@@ -270,6 +297,131 @@ namespace dewcin
 		else
 		{
 			OutputDebugStringA("Window handle is null\n");
+		}
+	}
+
+	// Input
+	
+	Input::KeyboardInputMap Input::keyboard;
+	
+	// TODO : add test for validity of the provided keycode ??
+
+	Input::KeyState Input::getKeyState(unsigned int keycode)
+	{
+		return keyboard.keys[keycode];
+	}
+
+	bool Input::isKeyPressed(unsigned int keycode)
+	{
+		return keyboard.keys[keycode].is_down;
+	}
+
+	bool Input::isKeyReleased(unsigned int keycode)
+	{
+		return !keyboard.keys[keycode].is_down && keyboard.keys[keycode].was_down;
+	}
+
+	bool Input::wasKeyHit(unsigned int keycode)
+	{
+		return keyboard.keys[keycode].is_down && !keyboard.keys[keycode].was_down;
+	}
+	
+	void Input::process_keyboard_input(uint32_t VKCode, bool was_down, bool is_down)
+	{
+		if (was_down != is_down)
+		{
+			if (VKCode >= 'A' && VKCode <= 'Z')
+			{
+				uint8_t dc_keycode = VKCode - 'A';
+				keyboard.keys[dc_keycode].is_down = is_down;
+				keyboard.keys[dc_keycode].was_down = was_down;
+			}
+			else if (VKCode == VK_UP)
+			{
+				keyboard.keys[DC_UP].is_down = is_down;
+				keyboard.keys[DC_UP].was_down = was_down;
+			}
+			else if (VKCode == VK_DOWN)
+			{
+				keyboard.keys[DC_DOWN].is_down = is_down;
+				keyboard.keys[DC_DOWN].was_down = was_down;
+			}
+			else if (VKCode == VK_LEFT)
+			{
+				keyboard.keys[DC_LEFT].is_down = is_down;
+				keyboard.keys[DC_LEFT].was_down = was_down;
+			}
+			else if (VKCode == VK_RIGHT)
+			{
+				keyboard.keys[DC_RIGHT].is_down = is_down;
+				keyboard.keys[DC_RIGHT].was_down = was_down;
+			}
+			else if (VKCode >= '0' && VKCode <= '9')
+			{
+				uint8_t dc_keycode = VKCode - '0' + DC_0;
+				keyboard.keys[dc_keycode].is_down = is_down;
+				keyboard.keys[dc_keycode].was_down = was_down;
+			}
+			else if (VKCode == VK_OEM_MINUS)
+			{
+				keyboard.keys[DC_MINUS].is_down = is_down;
+				keyboard.keys[DC_MINUS].was_down = was_down;
+			}
+			else if (VKCode == VK_OEM_PLUS)
+			{
+				keyboard.keys[DC_PLUS].is_down = is_down;
+				keyboard.keys[DC_PLUS].was_down = was_down;
+			}
+			else if (VKCode == VK_SHIFT)
+			{
+				keyboard.keys[DC_SHIFT].is_down = is_down;
+				keyboard.keys[DC_SHIFT].was_down = was_down;
+			}
+			else if (VKCode == VK_CONTROL)
+			{
+				keyboard.keys[DC_CONTROL].is_down = is_down;
+				keyboard.keys[DC_CONTROL].was_down = was_down;
+			}
+			else if (VKCode == VK_MENU)
+			{
+				keyboard.keys[DC_ALT].is_down = is_down;
+				keyboard.keys[DC_ALT].was_down = was_down;
+			}
+			else if (VKCode == VK_SPACE)
+			{
+				keyboard.keys[DC_SPACE].is_down = is_down;
+				keyboard.keys[DC_SPACE].was_down = was_down;
+			}
+			else if (VKCode == VK_ESCAPE)
+			{
+				keyboard.keys[DC_ESCAPE].is_down = is_down;
+				keyboard.keys[DC_ESCAPE].was_down = was_down;
+			}
+			else if (VKCode == VK_CAPITAL)
+			{
+				keyboard.keys[DC_CAPSLOCK].is_down = is_down;
+				keyboard.keys[DC_CAPSLOCK].was_down = was_down;
+			}
+			else if (VKCode == VK_TAB)
+			{
+				keyboard.keys[DC_TAB].is_down = is_down;
+				keyboard.keys[DC_TAB].was_down = was_down;
+			}
+			else if (VKCode == VK_RETURN)
+			{
+				keyboard.keys[DC_ENTER].is_down = is_down;
+				keyboard.keys[DC_ENTER].was_down = was_down;
+			}
+			else if (VKCode == VK_BACK)
+			{
+				keyboard.keys[DC_BACKSPACE].is_down = is_down;
+				keyboard.keys[DC_BACKSPACE].was_down = was_down;
+			}
+			else if (VKCode == VK_OEM_3)
+			{
+				keyboard.keys[DC_TILDE].is_down = is_down;
+				keyboard.keys[DC_TILDE].was_down = was_down;
+			}
 		}
 	}
 }

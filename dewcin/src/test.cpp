@@ -10,9 +10,12 @@ DEWCIN_APP_ENTRY_POINT
 
 	test_window.before_clear = [&](dewcin::Window* window, float delta)
 	{
-		char char_buffer[256];
-		sprintf_s(char_buffer, "delta: %.2f\n", delta);
-		OutputDebugStringA(char_buffer);
+		//char char_buffer[256];
+		//sprintf_s(char_buffer, "delta: %.2f\n", delta);
+		//OutputDebugStringA(char_buffer);
+		
+		if (dewcin::Input::isKeyPressed(DC_A))
+			OutputDebugStringA("A has been pressed!\n");
 		
 		accumulated_delta += delta;
 
