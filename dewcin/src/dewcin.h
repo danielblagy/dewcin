@@ -193,6 +193,7 @@ namespace dewcin
 		void start_window();
 	};
 
+	// TODO : rigorously test the keyboard input polling
 	class Input
 	{
 		friend LRESULT CALLBACK WindowCallback(

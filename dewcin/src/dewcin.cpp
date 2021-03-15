@@ -256,7 +256,7 @@ namespace dewcin
 				uint64_t cycles_elapsed = current_cycle_count - last_cycle_count;
 				int64_t counter_elapsed = current_counter.QuadPart - last_counter.QuadPart;
 
-				float delta = 1000.0f * (float)counter_elapsed / (float)cpu_frequency.QuadPart;	// in milliseconds
+				float delta = (float)counter_elapsed / (float)cpu_frequency.QuadPart;	// in seconds
 				//int32_t fps = (int32_t)(cpu_frequency.QuadPart / counter_elapsed);
 
 				last_cycle_count = current_cycle_count;
