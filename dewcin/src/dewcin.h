@@ -1,6 +1,7 @@
 #pragma once
 
 #include <windows.h>
+#include <windowsx.h>
 
 #include <thread>
 #include <string>
@@ -67,6 +68,14 @@
 #define DC_ENTER		49
 #define DC_BACKSPACE	50
 #define DC_TILDE		51
+
+#define DC_MAX_MOUSE_BUTTONS 5
+
+#define DC_MOUSE_LEFT	0
+#define DC_MOUSE_RIGHT	1
+#define DC_MOUSE_MIDDLE	2
+#define DC_MOUSE_X1		3
+#define DC_MOUSE_X2		4
 
 
 namespace dewcin
@@ -193,7 +202,8 @@ namespace dewcin
 		void start_window();
 	};
 
-	// TODO : rigorously test the keyboard input polling
+	// TODO : extensive testing of the keyboard input polling
+	// TODO : extensive testing of the mouse input polling
 	class Input
 	{
 		friend LRESULT CALLBACK WindowCallback(
@@ -210,14 +220,31 @@ namespace dewcin
 			uint8_t was_down : 4;
 		};
 
-
 		struct KeyboardInputMap
 		{
 			KeyState keys[DC_MAX_KEYS];
 		};
+
+		struct ButtonState
+		{
+			uint8_t is_down : 4;
+			uint8_t was_down : 4;
+		};
+		
+		struct Position
+		{
+			int x, y;
+		};
+		
+		struct MouseInputMap
+		{
+			ButtonState buttons[DC_MAX_MOUSE_BUTTONS];
+			Position position;
+		};
 	
 	private:
 		static KeyboardInputMap keyboard;
+		static MouseInputMap mouse;
 	
 	public:
 		// Returns an Input::KeyState of the key
@@ -232,7 +259,21 @@ namespace dewcin
 		// Returns true if a key has just been pressed down, false otherwise
 		static bool wasKeyHit(unsigned int keycode);
 
+		// Returns the x- and y-coordinates of the mouse pointer
+		static Position getMousePosition();
+
+		// Returns true if a mouse button is being pressed down, false otherwise
+		static bool isMouseButtonPressed(unsigned int button_code);
+
+		// Returns true if a mouse button has stopped being pressed down, false otherwise
+		static bool isMouseButtonReleased(unsigned int button_code);
+
+		// Returns true if a mouse button has just been pressed down, false otherwise
+		static bool wasMouseButtonHit(unsigned int button_code);
+
 	private:
 		static void process_keyboard_input(uint32_t VKCode, bool was_down, bool is_down);
+
+		static void process_mouse_input(WPARAM wParam, LPARAM lParam);
 	};
 }

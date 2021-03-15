@@ -129,8 +129,8 @@ namespace dewcin
 		LRESULT result = 0;
 
 		Window* window = (Window*)GetWindowLongPtr(window_handle, GWLP_USERDATA);
-		if (window)
-			OutputDebugStringA(window->title);
+		//if (window)
+		//	OutputDebugStringA(window->title);
 
 		switch (message)
 		{
@@ -167,6 +167,18 @@ namespace dewcin
 			}
 
 			Input::process_keyboard_input(VKCode, was_down, is_down);
+		} break;
+
+		case WM_LBUTTONDOWN:
+		case WM_LBUTTONUP:
+		case WM_RBUTTONDOWN:
+		case WM_RBUTTONUP:
+		case WM_MBUTTONDOWN:
+		case WM_MBUTTONUP:
+		case WM_XBUTTONDOWN:
+		case WM_XBUTTONUP:
+		{
+			Input::process_mouse_input(wParam, lParam);
 		} break;
 		
 		case WM_PAINT:
@@ -257,7 +269,6 @@ namespace dewcin
 				int64_t counter_elapsed = current_counter.QuadPart - last_counter.QuadPart;
 
 				float delta = (float)counter_elapsed / (float)cpu_frequency.QuadPart;	// in seconds
-				//int32_t fps = (int32_t)(cpu_frequency.QuadPart / counter_elapsed);
 
 				last_cycle_count = current_cycle_count;
 				last_counter = current_counter;
@@ -303,6 +314,7 @@ namespace dewcin
 	// Input
 	
 	Input::KeyboardInputMap Input::keyboard;
+	Input::MouseInputMap Input::mouse;
 	
 	// TODO : add test for validity of the provided keycode ??
 
@@ -324,6 +336,26 @@ namespace dewcin
 	bool Input::wasKeyHit(unsigned int keycode)
 	{
 		return keyboard.keys[keycode].is_down && !keyboard.keys[keycode].was_down;
+	}
+
+	Input::Position Input::getMousePosition()
+	{
+		return mouse.position;
+	}
+	
+	bool Input::isMouseButtonPressed(unsigned int button_code)
+	{
+		return mouse.buttons[button_code].is_down;
+	}
+
+	bool Input::isMouseButtonReleased(unsigned int button_code)
+	{
+		return !mouse.buttons[button_code].is_down && mouse.buttons[button_code].was_down;
+	}
+
+	bool Input::wasMouseButtonHit(unsigned int button_code)
+	{
+		return mouse.buttons[button_code].is_down && !mouse.buttons[button_code].was_down;
 	}
 	
 	void Input::process_keyboard_input(uint32_t VKCode, bool was_down, bool is_down)
@@ -423,5 +455,24 @@ namespace dewcin
 				keyboard.keys[DC_TILDE].was_down = was_down;
 			}
 		}
+	}
+
+	void Input::process_mouse_input(WPARAM wParam, LPARAM lParam)
+	{
+		// update every button state
+		mouse.buttons[DC_MOUSE_LEFT].was_down = mouse.buttons[DC_MOUSE_LEFT].is_down;
+		mouse.buttons[DC_MOUSE_RIGHT].was_down = mouse.buttons[DC_MOUSE_RIGHT].is_down;
+		mouse.buttons[DC_MOUSE_MIDDLE].was_down = mouse.buttons[DC_MOUSE_MIDDLE].is_down;
+		mouse.buttons[DC_MOUSE_X1].was_down = mouse.buttons[DC_MOUSE_X1].is_down;
+		mouse.buttons[DC_MOUSE_X2].was_down = mouse.buttons[DC_MOUSE_X2].is_down;
+		
+		mouse.buttons[DC_MOUSE_LEFT].is_down = wParam & MK_LBUTTON;
+		mouse.buttons[DC_MOUSE_RIGHT].is_down = wParam & MK_RBUTTON;
+		mouse.buttons[DC_MOUSE_MIDDLE].is_down = wParam & MK_MBUTTON;
+		mouse.buttons[DC_MOUSE_X1].is_down = wParam & MK_XBUTTON1;
+		mouse.buttons[DC_MOUSE_X2].is_down = wParam & MK_XBUTTON2;
+
+		mouse.position.x = GET_X_LPARAM(lParam);
+		mouse.position.y = GET_Y_LPARAM(lParam);
 	}
 }

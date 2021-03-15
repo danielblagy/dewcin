@@ -9,9 +9,16 @@ DEWCIN_APP_ENTRY_POINT
 
 	test_window.before_clear = [&](dewcin::Window* window, float delta)
 	{
-		//char char_buffer[256];
-		//sprintf_s(char_buffer, "delta: %.2f\n", delta);
+		char char_buffer[256];
+		//sprintf_s(char_buffer, "delta: %f\n", delta);
 		//OutputDebugStringA(char_buffer);
+
+		if (dewcin::Input::isMouseButtonPressed(DC_MOUSE_RIGHT))
+		{
+			dewcin::Input::Position mouse_pos = dewcin::Input::getMousePosition();
+			sprintf_s(char_buffer, "mouse pos: %d  %d\n", mouse_pos.x, mouse_pos.y);
+			OutputDebugStringA(char_buffer);
+		}
 		
 		if (dewcin::Input::isKeyPressed(DC_A))
 			player_x -= 100.f * delta;
