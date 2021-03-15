@@ -180,6 +180,11 @@ namespace dewcin
 		{
 			Input::process_mouse_input(wParam, lParam);
 		} break;
+
+		case WM_MOUSEMOVE:
+		{
+			Input::update_mouse_position(lParam);
+		} break;
 		
 		case WM_PAINT:
 		{
@@ -472,6 +477,11 @@ namespace dewcin
 		mouse.buttons[DC_MOUSE_X1].is_down = wParam & MK_XBUTTON1;
 		mouse.buttons[DC_MOUSE_X2].is_down = wParam & MK_XBUTTON2;
 
+		update_mouse_position(lParam);
+	}
+
+	void Input::update_mouse_position(LPARAM lParam)
+	{
 		mouse.position.x = GET_X_LPARAM(lParam);
 		mouse.position.y = GET_Y_LPARAM(lParam);
 	}

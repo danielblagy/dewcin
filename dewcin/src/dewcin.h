@@ -275,5 +275,6 @@ namespace dewcin
 		static void process_keyboard_input(uint32_t VKCode, bool was_down, bool is_down);
 
 		static void process_mouse_input(WPARAM wParam, LPARAM lParam);
+		static void update_mouse_position(LPARAM lParam);
 	};
 }

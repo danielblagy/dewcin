@@ -13,11 +13,13 @@ DEWCIN_APP_ENTRY_POINT
 		//sprintf_s(char_buffer, "delta: %f\n", delta);
 		//OutputDebugStringA(char_buffer);
 
+		dewcin::Input::Position mouse_pos = dewcin::Input::getMousePosition();
+		sprintf_s(char_buffer, "mouse pos: %d  %d\n", mouse_pos.x, mouse_pos.y);
+		OutputDebugStringA(char_buffer);
+
 		if (dewcin::Input::isMouseButtonPressed(DC_MOUSE_RIGHT))
 		{
-			dewcin::Input::Position mouse_pos = dewcin::Input::getMousePosition();
-			sprintf_s(char_buffer, "mouse pos: %d  %d\n", mouse_pos.x, mouse_pos.y);
-			OutputDebugStringA(char_buffer);
+			OutputDebugStringA("right mouse button is pressed!\n");
 		}
 		
 		if (dewcin::Input::isKeyPressed(DC_A))
