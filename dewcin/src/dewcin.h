@@ -165,14 +165,21 @@ namespace dewcin
 		
 		friend class Renderer;
 
+		friend class Component;
+		friend class Button;
+
 	private:
 		// TODO : move to Gui
 		static HINSTANCE hInstance;
+
+		HWND window_handle = 0;
 		
 		std::thread window_thread;
 		bool running;
 
 		Renderer::BitmapBuffer graphics_buffer;
+
+		bool init_occurred = false;
 
 	public:
 		// The background color of the window in float RGB
@@ -188,12 +195,15 @@ namespace dewcin
 
 	private:
 		const char* title;
+		// TODO : just use plain old int, and add x & y
 		Dimensions size;
 	
 	public:
 		// TODO : window background color, positioning, resize, fullscreen
 		Window(const char* title, const Dimensions& size);
 		~Window();
+
+		void add(Component* component);
 
 		inline const char* getTitle() { return title; }
 		inline Dimensions getSize() { return size; }
@@ -276,5 +286,34 @@ namespace dewcin
 
 		static void process_mouse_input(WPARAM wParam, LPARAM lParam);
 		static void update_mouse_position(LPARAM lParam);
+	};
+
+	class Component
+	{
+		friend Window;
+	
+	protected:
+		const char* text;
+		int x, y, width, height;
+
+	protected:
+		Component(const char* text, int x, int y, int width, int height);
+
+	protected:
+		virtual void create(Window* window) = 0;
+	};
+	
+	class Button : public Component
+	{
+		friend Window;
+
+	private:
+		HWND button_handle = 0;
+	
+	public:
+		Button(const char* text, int x, int y, int width, int height);
+	
+	private:
+		virtual void create(Window* window) override;
 	};
 }

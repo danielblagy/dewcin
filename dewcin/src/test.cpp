@@ -42,6 +42,9 @@ DEWCIN_APP_ENTRY_POINT
 			{ 0.f, 1.f, 0.f }
 		);
 	};
+
+	dewcin::Button button("Hello button", 200, 450, 50, 20);
+	test_window.add(&button);
 	
 	return 0;
 }

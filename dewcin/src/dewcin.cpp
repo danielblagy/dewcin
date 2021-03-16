@@ -111,11 +111,19 @@ namespace dewcin
 
 		// gray color by default if unspecified
 		background_color = { 0.5f, 0.5f, 0.5f };
+
+		// stall until the window is created
+		while (!init_occurred);
 	}
 
 	Window::~Window()
 	{
 		window_thread.join();
+	}
+
+	void Window::add(Component* component)
+	{
+		component->create(this);
 	}
 	
 	// TODO : resolve the separate thread issue
@@ -231,7 +239,7 @@ namespace dewcin
 			return;
 		}
 
-		HWND window_handle = CreateWindowExA(
+		window_handle = CreateWindowExA(
 			0,
 			window_class.lpszClassName,
 			title,
@@ -248,6 +256,8 @@ namespace dewcin
 
 		if (window_handle)
 		{
+			init_occurred = true;
+			
 			OutputDebugStringA("INIT\n");
 			
 			// Set user data for the win32 window callback function
@@ -312,6 +322,7 @@ namespace dewcin
 		}
 		else
 		{
+			init_occurred = true;
 			OutputDebugStringA("Window handle is null\n");
 		}
 	}
@@ -484,5 +495,33 @@ namespace dewcin
 	{
 		mouse.position.x = GET_X_LPARAM(lParam);
 		mouse.position.y = GET_Y_LPARAM(lParam);
+	}
+
+	// Component
+
+	Component::Component(const char* s_text, int s_x, int s_y, int s_width, int s_height)
+		: text(s_text), x(s_x), y(s_y), width(s_width), height(s_height)
+	{}
+
+	// Button
+
+	Button::Button(const char* text, int x, int y, int width, int height)
+		: Component(text, x, y, width, height)
+	{}
+
+	void Button::create(Window* window)
+	{
+		button_handle = CreateWindow(
+			"BUTTON",  // Predefined class; Unicode assumed 
+			text,      // Button text 
+			WS_TABSTOP | WS_VISIBLE | WS_CHILD | BS_DEFPUSHBUTTON,  // Styles 
+			x,			// x position 
+			y,			// y position 
+			width,		// Button width
+			height,		// Button height
+			window->window_handle,		// Parent window
+			NULL,		// No menu.
+			(HINSTANCE)GetWindowLongPtr(window->window_handle, GWLP_HINSTANCE),
+			NULL);      // Pointer not needed.
 	}
 }
